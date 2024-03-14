@@ -14,7 +14,9 @@ import android.net.wifi.p2p.WifiP2pManager
 import android.net.wifi.p2p.WifiP2pManager.ActionListener
 import android.os.Build
 import com.leadwoods.p2p_environment.WifiP2pPeer
+import com.leadwoods.p2p_environment.activities.MainActivity
 import com.leadwoods.p2p_environment.support.Logger
+import java.net.InetAddress
 
 /**
  *
@@ -148,8 +150,20 @@ open class P2pBaseHandler protected constructor(){
         })
     }
 
-    fun createGroup(){
-        Logger.w("This Function should not be called")
+    @SuppressLint("MissingPermission")
+    fun createGroup() {
+        Logger.d("called | Creating a new empty group")
+        p2pChannel?.also { channel ->
+            p2pManager?.createGroup(channel, object: ActionListener{
+                override fun onSuccess() {
+                    Logger.d("Group Creation successful")
+                }
+
+                override fun onFailure(reason: Int) {
+                    Logger.e("Failed to create group: $reason")
+                }
+            })
+        }
     }
 
     /**
@@ -228,13 +242,21 @@ open class P2pBaseHandler protected constructor(){
         }
     }
 
-    // Getters
+    // Getters & Setters
 
     /**
      * @return string of the current host address
      */
     fun getHostAddress(): String? {
         return hostInfo.groupOwnerAddress.hostAddress
+    }
+
+    fun setHostAddress(groupOwnerAddress: InetAddress?, isOwner: Boolean) {
+        if(groupOwnerAddress == null)
+            Logger.w("Cannot Save a Null Host Address")
+
+        hostInfo.groupOwnerAddress = groupOwnerAddress
+        isHost = isOwner
     }
 
     /**
@@ -248,18 +270,34 @@ open class P2pBaseHandler protected constructor(){
      * Register the broadcast receiver to the given context
      */
     @SuppressLint("UnspecifiedRegisterReceiverFlag")
-    fun register(context: Context) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            context.registerReceiver(p2pReceiver, p2pIntentFilter, Context.RECEIVER_NOT_EXPORTED)
-        } else
-            context.registerReceiver(p2pReceiver, p2pIntentFilter)
+    fun register(context: Context):Boolean {
+        Logger.d("called")
+        return if(::p2pReceiver.isInitialized) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                context.registerReceiver(p2pReceiver, p2pIntentFilter, Context.RECEIVER_NOT_EXPORTED)
+            } else
+                context.registerReceiver(p2pReceiver, p2pIntentFilter)
+            Logger.i("p2pReceiver registered")
+            true
+        } else {
+            Logger.w("Cannot register p2pReceiver at this time")
+            false
+        }
     }
 
     /**
      * Unregister the broadcast receiver from the given context
      */
-    fun unregister(context: Context) {
-        context.unregisterReceiver(p2pReceiver)
+    fun unregister(context: Context):Boolean {
+        Logger.d("called")
+        return if(::p2pReceiver.isInitialized) {
+            context.unregisterReceiver(p2pReceiver)
+            Logger.i("p2pReceiver unregistered")
+            true
+        } else{
+            Logger.w("Cannot unregister p2pReceiver at this time")
+            false
+        }
     }
 
     fun getPeerVisibility(): Boolean {
@@ -270,14 +308,24 @@ open class P2pBaseHandler protected constructor(){
         showAllPeers = newFlag
     }
 
+    fun startSocketListening(activity: MainActivity) {
+        DataListener(activity).execute()
+    }
+
+    fun resumeSocketListening(): Boolean {
+        return keepDownloading
+    }
+
     companion object {
         private var instance: P2pBaseHandler? = null
 
         /**
          * @return instance of [P2pBaseHandler], creating a new one if one doesn't exist.
          */
-        fun getInstance(): P2pBaseHandler{
-            return instance?: P2pBaseHandler()
+        fun getInstance(): P2pBaseHandler {
+            return instance ?: P2pBaseHandler()
         }
     }
+
+
 }

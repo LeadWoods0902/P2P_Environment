@@ -1,6 +1,5 @@
 package com.leadwoods.p2p_environment.activities
 
-import android.Manifest
 import android.Manifest.permission.NEARBY_WIFI_DEVICES
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
@@ -12,6 +11,7 @@ import android.os.Build
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
@@ -23,15 +23,14 @@ import androidx.recyclerview.widget.RecyclerView
 import com.leadwoods.p2p_environment.PeersAdapter
 import com.leadwoods.p2p_environment.R
 import com.leadwoods.p2p_environment.WifiP2pPeer
+import com.leadwoods.p2p_environment.databinding.ActivityMainBinding
 import com.leadwoods.p2p_environment.deviceListToListOfPeers
-import com.leadwoods.p2p_environment.networking.DataListener
 import com.leadwoods.p2p_environment.networking.P2pBaseHandler
 import com.leadwoods.p2p_environment.support.AppBase
 import com.leadwoods.p2p_environment.support.Logger
 import com.leadwoods.p2p_environment.support.checkAllPermissions
 import com.leadwoods.p2p_environment.support.permissionsOverview
 import com.leadwoods.p2p_environment.support.requestAllPermissions
-import com.leadwoods.p2p_environment.tagPeersOwnerStatus
 import kotlin.math.min
 
 
@@ -58,15 +57,20 @@ class MainActivity: AppBase(), PeersAdapter.PeerTouchInterface, ConnectionInfoLi
 
 
     // UI elements
-    private lateinit var peersRV: RecyclerView
-    private lateinit var connectionDetailsCL: ConstraintLayout
-    private lateinit var hostGroupB: Button
-    private lateinit var scanForGroupsB: Button
-    private lateinit var sendDataB: Button
 
-    private lateinit var userTypeTV: TextView
-    private lateinit var transmitET: EditText
-    private lateinit var receivedTV: TextView
+    private var _binding: ActivityMainBinding? = null
+
+    private val binding get() = _binding!!
+
+    private val peersRV: RecyclerView get() = binding!!.RVGroups
+    private val connectionDetailsCL: ConstraintLayout  get() = binding!!.CLConnectionDetails
+    private val hostGroupB: Button get() = binding!!.BHostGroup
+    private val scanForGroupsB: Button get() = binding!!.BScanForGroups
+    private val sendDataB: Button get() = binding!!.BBroadcastToGroup
+
+    private val userTypeTV: TextView get() = binding!!.TVUserType
+    private val transmitET: EditText get() = binding!!.ETTransmitData
+    private val receivedTV: TextView get() = binding!!.TVReceivedData
 
     // Networking
     private var isP2PEnabled: Boolean = false
@@ -136,7 +140,9 @@ class MainActivity: AppBase(), PeersAdapter.PeerTouchInterface, ConnectionInfoLi
     override fun onCreate(savedInstanceState: Bundle?) {
         Logger.d("called")
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        _binding = ActivityMainBinding.inflate(layoutInflater)
+
+        setContentView(binding.root)
 
         p2pHandler = P2pBaseHandler.getInstance()
 
@@ -154,22 +160,34 @@ class MainActivity: AppBase(), PeersAdapter.PeerTouchInterface, ConnectionInfoLi
         configInterface()
     }
 
+    /**
+     * When resuming the the activity, create a new listener if necessary then register it
+     */
+    override fun onResume() {
+        Logger.d("called")
+        super.onResume()
+        if(::p2pHandler.isInitialized)
+            p2pHandler.register(this)
+
+    }
+
+    /**
+     * When pausing the the activity, unregister the receiver if it still exists
+     */
+    override fun onPause() {
+        Logger.d("called")
+        super.onPause()
+        if(::p2pHandler.isInitialized)
+            p2pHandler.register(this)
+    }
+
 
     /**
      * Configures the User Interface
      */
     private fun configInterface() {
-        // Get UI Elements
-        peersRV = findViewById(R.id.RV_Groups)
-        connectionDetailsCL = findViewById(R.id.CL_ConnectionDetails)
-        hostGroupB = findViewById(R.id.B_HostGroup)
-        sendDataB = findViewById(R.id.B_BroadcastToGroup)
-        scanForGroupsB = findViewById(R.id.B_ScanForGroups)
 
-        userTypeTV = findViewById(R.id.TV_UserType)
-        receivedTV = findViewById(R.id.TV_ReceivedData)
-        transmitET = findViewById(R.id.ET_TransmitData)
-
+        // Configure peers RV
         peersRV.layoutManager = LinearLayoutManager(this).apply {
             orientation = LinearLayoutManager.VERTICAL
         }
@@ -224,7 +242,7 @@ class MainActivity: AppBase(), PeersAdapter.PeerTouchInterface, ConnectionInfoLi
             clearPeerResults()
 
             // Create a new group and make it visible
-            createGroup()
+            p2pHandler.createGroup()
         }
     }
 
@@ -237,43 +255,7 @@ class MainActivity: AppBase(), PeersAdapter.PeerTouchInterface, ConnectionInfoLi
     }
 
 
-    /**
-     * When resuming the the activity, create a new listener if necessary then register it
-     */
-    @SuppressLint("UnspecifiedRegisterReceiverFlag")
-    override fun onResume() {
-        Logger.d("called")
-        super.onResume()
 
-//        if (p2pReceiver == null){
-//            Logger.d("p2pReceiver was null")
-//            if(p2pManager != null && p2pChannel != null)
-//                p2pReceiver = P2PConnectionsListener(p2pManager!!, p2pChannel!!, this)
-//        }
-//        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
-//            registerReceiver(p2pReceiver, p2pIntentFilter, RECEIVER_NOT_EXPORTED)
-//        else
-//            registerReceiver(p2pReceiver, p2pIntentFilter)
-
-
-        p2pHandler.register(this)
-
-    }
-
-    /**
-     * When pausing the the activity, unregister the receiver if it still exists
-     */
-    override fun onPause() {
-        Logger.d("called")
-        super.onPause()
-
-//        p2pReceiver?.also { p2pReceiver ->
-//            unregisterReceiver(p2pReceiver)
-//        }
-
-        p2pHandler.unregister(this)
-
-    }
 
 
     /**
@@ -314,7 +296,7 @@ class MainActivity: AppBase(), PeersAdapter.PeerTouchInterface, ConnectionInfoLi
 
             R.id.MI_Disconnect -> {
                 if(p2pHandler.getGroupStatus()) {
-                    disconnect()
+                    p2pHandler.disconnect()
                 }
             }
 
@@ -375,17 +357,15 @@ class MainActivity: AppBase(), PeersAdapter.PeerTouchInterface, ConnectionInfoLi
         Logger.d("called | $info")
         if (info != null) {
             Logger.d("Connected to ${info.groupOwnerAddress}")
-            hostInfo = info
-
             // Update the UI to reflect the device's user type
             if(info.groupFormed) {
-                DataListener(this).execute()
 
-                isGroupOwner = info.isGroupOwner
+                p2pHandler.setHostAddress(info.groupOwnerAddress, info.isGroupOwner)
+
+                p2pHandler.startSocketListening(this)
 
                 updateInterface(info, true)
             } else {
-                isGroupOwner = false
                 updateInterface(null, false)
             }
         }
@@ -398,10 +378,10 @@ class MainActivity: AppBase(), PeersAdapter.PeerTouchInterface, ConnectionInfoLi
             peersRV.visibility = View.GONE
             connectionDetailsCL.visibility = View.VISIBLE
 
-            if (isGroupOwner) {
+            if (info!!.isGroupOwner) {
                 userTypeTV.text = "Hosting Group"
             } else {
-                userTypeTV.text = "Connected to: ${info!!.groupOwnerAddress}"
+                userTypeTV.text = "Connected to: ${info.groupOwnerAddress}"
             }
         } else {
             peersRV.visibility = View.VISIBLE
@@ -410,30 +390,13 @@ class MainActivity: AppBase(), PeersAdapter.PeerTouchInterface, ConnectionInfoLi
     }
 
     /**
-     *
+     * Callback from DataListener
      */
     fun downloadComplete(received: String) {
-
+        Logger.d("called")
         receivedTV.text = received
 
-        if(keepDownloading)
-            DataListener(this).execute()
+        if(p2pHandler.resumeSocketListening())
+            p2pHandler.startSocketListening(this)
     }
-
-    @SuppressLint("MissingPermission")
-    fun createGroup() {
-        Logger.d("called | Creating a new empty group")
-        p2pChannel?.also { channel ->
-            p2pManager?.createGroup(channel, object: ActionListener{
-                override fun onSuccess() {
-                    Logger.d("Group Creation successful")
-                }
-
-                override fun onFailure(reason: Int) {
-                    Logger.e("Failed to create group: $reason")
-                }
-            })
-        }
-    }
-
 }
