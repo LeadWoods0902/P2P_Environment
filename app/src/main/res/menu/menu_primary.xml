@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/MI_RequestPermissions"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:icon="@drawable/insufficient_permissions_24px"
+        android:title="Request Permissions"
+        android:visible="true"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/MI_NearbyDevices"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:title="Nearby Devices"
+        android:visibility="gone" />
+
+    <item
+        android:id="@+id/SI_AllPeersToggle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:checkable="true"
+        android:enabled="true"
+        android:title="Show All Peers"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/MI_Disconnect"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:icon="@drawable/logout_24px"
+        android:title="Disconnect"
+        app:showAsAction="always" />
+</menu>
