@@ -6,6 +6,7 @@ import android.Manifest.permission.ACCESS_NETWORK_STATE
 import android.Manifest.permission.ACCESS_WIFI_STATE
 import android.Manifest.permission.CHANGE_NETWORK_STATE
 import android.Manifest.permission.CHANGE_WIFI_STATE
+import android.Manifest.permission.INTERNET
 import android.Manifest.permission.NEARBY_WIFI_DEVICES
 import android.app.Activity
 import android.app.AlertDialog
@@ -18,16 +19,22 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentManager
-import com.leadwoods.p2p_environment.activities.MainActivity
+import com.leadwoods.p2p_environment.activities.SecondaryActivity
+
+val permissions = if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
+    arrayOf(ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION, ACCESS_WIFI_STATE, CHANGE_WIFI_STATE, ACCESS_NETWORK_STATE, CHANGE_NETWORK_STATE, INTERNET, NEARBY_WIFI_DEVICES)
+else
+    arrayOf(ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION, ACCESS_WIFI_STATE, CHANGE_WIFI_STATE, ACCESS_NETWORK_STATE, CHANGE_NETWORK_STATE, INTERNET)
 
 class PermissionDialog(private val activity: Activity, private val permissionName: String, private val permissions: Array<String>): DialogFragment(){
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+        Logger.f()
         return AlertDialog.Builder(activity).apply {
             setMessage("$permissionName is required")
             setPositiveButton("Accept") { dialog, _ ->
                 ActivityCompat.requestPermissions(
-                    activity, permissions, MainActivity.PERMISSION_REQUEST_CODE
+                    activity, permissions, SecondaryActivity.PERMISSION_REQUEST_CODE
                 )
                 dialog.dismiss()
             }
@@ -39,11 +46,11 @@ class PermissionDialog(private val activity: Activity, private val permissionNam
 }
 
 fun Context.checkAllPermissions(): Boolean {
-    Logger.d("called")
-    val permissions = if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
-        arrayOf(CHANGE_WIFI_STATE, ACCESS_WIFI_STATE, NEARBY_WIFI_DEVICES, CHANGE_NETWORK_STATE, ACCESS_NETWORK_STATE)
-    else
-        arrayOf(CHANGE_WIFI_STATE, ACCESS_WIFI_STATE, CHANGE_NETWORK_STATE, ACCESS_NETWORK_STATE)
+    Logger.f()
+//    val permissions = if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
+//        arrayOf(CHANGE_WIFI_STATE, ACCESS_WIFI_STATE, NEARBY_WIFI_DEVICES, CHANGE_NETWORK_STATE, ACCESS_NETWORK_STATE, INTERNET)
+//    else
+//        arrayOf(CHANGE_WIFI_STATE, ACCESS_WIFI_STATE, CHANGE_NETWORK_STATE, ACCESS_NETWORK_STATE, INTERNET)
 
     permissions.forEach {
         if(ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED) {
@@ -56,11 +63,8 @@ fun Context.checkAllPermissions(): Boolean {
 }
 
 fun requestAllPermissions(activity: Activity, fragmentManager: FragmentManager) {
-    Logger.d("called")
-    val permissions = if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
-        arrayOf(CHANGE_WIFI_STATE, ACCESS_WIFI_STATE, NEARBY_WIFI_DEVICES, CHANGE_NETWORK_STATE, ACCESS_NETWORK_STATE)
-    else
-        arrayOf(CHANGE_WIFI_STATE, ACCESS_WIFI_STATE, CHANGE_NETWORK_STATE, ACCESS_NETWORK_STATE)
+    Logger.f()
+
 
     permissions.forEach {
         PermissionDialog(
@@ -71,11 +75,11 @@ fun requestAllPermissions(activity: Activity, fragmentManager: FragmentManager) 
 }
 
 fun Context.permissionsOverview(): Triple<String, Int, Int>{
-    Logger.d("called")
-    val permissions = if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
-        arrayOf(CHANGE_WIFI_STATE, ACCESS_WIFI_STATE, NEARBY_WIFI_DEVICES, CHANGE_NETWORK_STATE, ACCESS_NETWORK_STATE, ACCESS_FINE_LOCATION, ACCESS_COARSE_LOCATION)
-    else
-        arrayOf(CHANGE_WIFI_STATE, ACCESS_WIFI_STATE, CHANGE_NETWORK_STATE, ACCESS_NETWORK_STATE, ACCESS_FINE_LOCATION, ACCESS_COARSE_LOCATION)
+    Logger.f()
+//    val permissions = if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
+//        arrayOf(CHANGE_WIFI_STATE, ACCESS_WIFI_STATE, NEARBY_WIFI_DEVICES, CHANGE_NETWORK_STATE, ACCESS_NETWORK_STATE, ACCESS_FINE_LOCATION, ACCESS_COARSE_LOCATION)
+//    else
+//        arrayOf(CHANGE_WIFI_STATE, ACCESS_WIFI_STATE, CHANGE_NETWORK_STATE, ACCESS_NETWORK_STATE, ACCESS_FINE_LOCATION, ACCESS_COARSE_LOCATION)
 
     var notGranted = permissions.size
 

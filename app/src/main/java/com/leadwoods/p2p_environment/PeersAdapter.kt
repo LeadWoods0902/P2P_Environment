@@ -36,12 +36,12 @@ class PeersAdapter(
     private lateinit var taggedPeers: List<WifiP2pPeer>
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PeerHolder {
-        Logger.d("called")
+        Logger.f()
         return PeerHolder(LayoutInflater.from(parent.context).inflate(R.layout.card_peer, parent, false))
     }
 
     override fun getItemCount(): Int {
-        Logger.d("called")
+        Logger.f()
         return if (filtered) {
             peers.filter { it.isGroupOwner }.size
         } else {
@@ -50,7 +50,7 @@ class PeersAdapter(
     }
 
     override fun onBindViewHolder(holder: PeerHolder, position: Int) {
-        Logger.d("called")
+        Logger.f()
 
         val peer = peers[position].device
 

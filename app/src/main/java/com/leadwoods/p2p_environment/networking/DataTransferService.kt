@@ -74,19 +74,17 @@ class DataTransferService: IntentService("DataTransferService") {
                             Logger.e("Error Closing oStream: ${e.message}")
                         }
                     }
-
                 } catch (e: IOException) {
                     Logger.e("${e.message}")
                 } finally {
-                    if (socket.isConnected)
+                    if (socket.isConnected) {
                         try {
                             socket.close()
                         } catch (e: IOException) {
                             Logger.e("${e.printStackTrace()}")
                         }
+                    }
                 }
-
-
             }
         }
     }

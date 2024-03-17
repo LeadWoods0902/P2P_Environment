@@ -28,7 +28,11 @@ abstract class Logger {
 
         private fun callingMethod(): Pair<String, String> {
             val stackTraceElement = Throwable().stackTrace.getOrNull(2) ?: StackTraceElement("", "", "", 0)
-            return stackTraceElement.className.split('.').last() to stackTraceElement.methodName
+            return Pair(stackTraceElement.className.split('.').last().split('$').first(), stackTraceElement.methodName)
+        }
+
+        fun f(message: String = "", group: LoggingGroups = ALWAYS, thread: Pair<String, String> = callingMethod()){
+            d("called", group = group, thread = thread)
         }
 
         fun d(message: String, group: LoggingGroups = ALWAYS, thread: Pair<String, String> = callingMethod()) {

@@ -2,6 +2,8 @@ package com.leadwoods.p2p_environment
 
 import android.net.wifi.p2p.WifiP2pDevice
 import android.net.wifi.p2p.WifiP2pDeviceList
+import android.net.wifi.p2p.WifiP2pGroup
+import com.leadwoods.p2p_environment.support.Logger
 
 /**
  * Wrapper for instances of [WifiP2pDevice] with additional flags
@@ -27,10 +29,21 @@ class WifiP2pPeer(
 //    }
 //}
 
-fun deviceListToListOfPeers(peers: WifiP2pDeviceList): List<WifiP2pPeer> {
+fun deviceListToListOfPeers(peers: WifiP2pDeviceList? = null, group: WifiP2pGroup? = null): List<WifiP2pPeer> {
+    if((peers != null && group != null)
+        || (peers == null && group == null)){
+        Logger.w("Unintended use scenario")
+        return listOf()
+    }
+
     return mutableListOf<WifiP2pPeer>().apply {
-        for (device in peers.deviceList) {
-            add(WifiP2pPeer(device))
-        }
+        if(group == null)
+            for (device in peers!!.deviceList) {
+                add(WifiP2pPeer(device))
+            }
+        else
+            for (device in group.clientList) {
+                add(WifiP2pPeer(device))
+            }
     }
 }

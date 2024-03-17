@@ -11,12 +11,12 @@
         android:visible="true"
         app:showAsAction="ifRoom" />
 
-    <item
-        android:id="@+id/MI_NearbyDevices"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:title="Nearby Devices"
-        android:visibility="gone" />
+<!--    <item-->
+<!--        android:id="@+id/MI_NearbyDevices"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:title="Nearby Devices"-->
+<!--        android:visibility="gone" />-->
 
     <item
         android:id="@+id/SI_AllPeersToggle"
@@ -24,7 +24,7 @@
         android:layout_height="wrap_content"
         android:checkable="true"
         android:enabled="true"
-        android:title="Show All Peers"
+        android:title="Group Owners Only"
         app:showAsAction="never" />
 
     <item

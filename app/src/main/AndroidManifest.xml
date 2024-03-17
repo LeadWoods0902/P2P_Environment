@@ -25,11 +25,20 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.P2P_Environment">
 
-        <service android:name=".networking.DataTransferService"
+        <service android:name=".wifip2p.p2p_handler.WifiP2PHandler"
             android:exported="false"/>
 
+<!--        <activity-->
+<!--            android:name=".activities.MainActivity"-->
+<!--            android:exported="true">-->
+<!--            <intent-filter>-->
+<!--                <action android:name="android.intent.action.MAIN"/>-->
+<!--                <category android:name="android.intent.category.LAUNCHER"/>-->
+<!--            </intent-filter>-->
+<!--        </activity>-->
+
         <activity
-            android:name=".activities.MainActivity"
+            android:name=".activities.SecondaryActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
